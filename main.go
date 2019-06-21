@@ -1,0 +1,120 @@
+package main
+
+import (
+	"crypto/rsa"
+	"encoding/asn1"
+	"encoding/pem"
+	"fmt"
+	"github.com/kelwing/Gangway/cfg"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
+	"html/template"
+	"io"
+	"net/http"
+	"os"
+)
+
+type AuthFramework struct {
+	*echo.Echo
+	config  cfg.Config
+	KeyPair *rsa.PrivateKey
+}
+
+type Template struct {
+	templates *template.Template
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func main() {
+	cf, err := os.Open("config/config.yaml")
+	if err != nil {
+		config := cfg.NewConfig()
+		err := config.GenerateSample()
+		if err == nil {
+			log.Fatal("Generated sample config")
+		}
+	}
+
+	fi, err := os.Stat("config/config.yaml")
+
+	data := make([]byte, fi.Size())
+	_, err = cf.Read(data)
+	if err != nil {
+		log.Fatal("Unable to read config data: ", err)
+	}
+	config := cfg.NewConfig()
+	err = config.Unmarshal(data)
+	if err != nil {
+		log.Fatal("Unable to load config: ", err)
+	}
+
+	e := AuthFramework{Echo: echo.New()}
+
+	if _, err := os.Stat(config.Security.PrivateKeyPath); os.IsNotExist(err) {
+		_, pub := e.GenerateKeyPair(config.Security.PrivateKeyPath, config.Security.BitSize)
+		config.Security.PublicKeyPath = pub
+		err = config.Save()
+		if err != nil {
+			log.Fatal("Unable to save config: ", err)
+		}
+	} else {
+		e.KeyPair, err = LoadPrivateKey(config.Security.PrivateKeyPath)
+		if err != nil {
+			log.Fatal("Unable to load private key")
+		}
+		pk, err := LoadPublicKey(config.Security.PublicKeyPath)
+		if err != nil {
+			log.Fatal("Unable to load public key")
+		}
+		e.KeyPair.PublicKey = *pk
+	}
+
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	CORSConfig := middleware.DefaultCORSConfig
+	CORSConfig.AllowOrigins = []string{config.Customization.SiteURL}
+	e.Use(middleware.CORSWithConfig(CORSConfig))
+	e.Use(middleware.BodyLimit("10M"))
+
+	t := &Template{
+		templates: template.Must(template.ParseGlob("public/views/*.html")),
+	}
+
+	e.Renderer = t
+
+	// Routes
+	e.GET("/", e.hello)
+	e.GET("publicKey", e.publicKey)
+	// Start server
+	port := os.Getenv("PORT")
+	fmt.Println("Port: ", port)
+	if port == "" {
+		port = "8989"
+	}
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
+}
+
+func (f *AuthFramework) hello(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{"app": "gangway", "version": "0.0.1"})
+}
+
+func (f *AuthFramework) publicKey(c echo.Context) error {
+	asn1Bytes, err := asn1.Marshal(f.KeyPair.PublicKey)
+	checkError(err)
+
+	var pemkey = &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: asn1Bytes,
+	}
+
+	return c.Blob(http.StatusOK, "application/x-pem-file", pem.EncodeToMemory(pemkey))
+}
+
+func (f *AuthFramework) login(c echo.Context) error {
+	return c.Render(http.StatusOK, "index", f.config)
+}
