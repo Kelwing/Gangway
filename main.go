@@ -97,8 +97,9 @@ func main() {
 	e.GET("/", e.hello)
 	e.GET("/publicKey", e.publicKey)
 	e.GET("/login", e.login)
-	e.GET("/process/:id", e.ProcessLogin)
-	e.GET("/authorize", e.AuthCallback)
+	e.GET("/process/:id", e.processLogin)
+	e.GET("/authorize", e.authCallback)
+	e.GET("/authtest", e.authTest)
 	// Start server
 	port := os.Getenv("PORT")
 	fmt.Println("Port: ", port)

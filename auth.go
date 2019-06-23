@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func (f *AuthFramework) ProcessLogin(c echo.Context) error {
+func (f *AuthFramework) processLogin(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "invalid provider"})
@@ -45,7 +45,7 @@ func (f *AuthFramework) ProcessLogin(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func (f *AuthFramework) AuthCallback(c echo.Context) error {
+func (f *AuthFramework) authCallback(c echo.Context) error {
 	sess, _ := session.Get("session", c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
@@ -79,5 +79,10 @@ func (f *AuthFramework) AuthCallback(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to sign token"})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "OK", "token": tokenString})
+	return c.Redirect(http.StatusTemporaryRedirect, f.config.Providers[id].TokenRedirect+"?token="+tokenString)
+}
+
+func (f *AuthFramework) authTest(c echo.Context) error {
+	token := c.QueryParam("token")
+	return c.JSON(http.StatusOK, map[string]string{"message": "OK", "token": token})
 }

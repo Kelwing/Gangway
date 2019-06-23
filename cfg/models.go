@@ -5,8 +5,9 @@ import "golang.org/x/oauth2"
 type (
 	Provider struct {
 		oauth2.Config
-		Enabled bool   `yaml:"enabled"`
-		Name    string `yaml:"name"`
+		TokenRedirect string `yaml:"post_auth_redirect"`
+		Enabled       bool   `yaml:"enabled"`
+		Name          string `yaml:"name"`
 	}
 
 	Security struct {
