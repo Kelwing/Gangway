@@ -1,8 +1,44 @@
-<html>
+{{define "login"}}
+	<!DOCTYPE html>
+	<html>
 	<head>
-		<title>{{ .Customization.AppName }}</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="assets/img/logo_r_resumme.png" type="image/x-icon" />
+		<title>Log In</title>
+		<script src="assets/js/particles.js"></script>
+		<script src="assets/js/main.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.3/css/bulma.min.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+		<link rel="stylesheet" href="assets/css/main.css">
 	</head>
 	<body>
-		Test Page
+	<div class="columns is-vcentered">
+		<div class="login column is-4 ">
+			<section class="section">
+				<div class="has-text-centered is-size-3">
+					{{ .Customization.AppName }}
+				</div>
+				<div class="has-text-centered">
+					Choose a login provider
+				</div>
+				<div class="has-text-centered">
+					{{ range $index, $element := .Providers }}
+						{{ if .Enabled }}
+							<a class="button is-vcentered is-primary is-outlined" href="/process/{{ $index }}">{{ .Name }}</a>
+						{{ end }}
+					{{ end }}
+				</div>
+				<div class="has-text-centered">
+					Powered by <a href="">Gangway</a>
+				</div>
+			</section>
+		</div>
+		<div id="particles-js" class="interactive-bg column is-8">
+		</div>
+	</div>
+
 	</body>
-</html>
+	</html>
+{{end}}

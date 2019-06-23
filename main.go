@@ -5,7 +5,9 @@ import (
 	"encoding/asn1"
 	"encoding/pem"
 	"fmt"
+	"github.com/gorilla/sessions"
 	"github.com/kelwing/Gangway/cfg"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -53,6 +55,7 @@ func main() {
 	}
 
 	e := AuthFramework{Echo: echo.New()}
+	e.config = config
 
 	if _, err := os.Stat(config.Security.PrivateKeyPath); os.IsNotExist(err) {
 		_, pub := e.GenerateKeyPair(config.Security.PrivateKeyPath, config.Security.BitSize)
@@ -80,6 +83,7 @@ func main() {
 	CORSConfig.AllowOrigins = []string{config.Customization.SiteURL}
 	e.Use(middleware.CORSWithConfig(CORSConfig))
 	e.Use(middleware.BodyLimit("10M"))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Security.CookieSecret))))
 
 	t := &Template{
 		templates: template.Must(template.ParseGlob("public/views/*.html")),
@@ -87,9 +91,14 @@ func main() {
 
 	e.Renderer = t
 
+	e.Static("/assets", "public/assets")
+
 	// Routes
 	e.GET("/", e.hello)
-	e.GET("publicKey", e.publicKey)
+	e.GET("/publicKey", e.publicKey)
+	e.GET("/login", e.login)
+	e.GET("/process/:id", e.ProcessLogin)
+	e.GET("/authorize", e.AuthCallback)
 	// Start server
 	port := os.Getenv("PORT")
 	fmt.Println("Port: ", port)
@@ -116,5 +125,5 @@ func (f *AuthFramework) publicKey(c echo.Context) error {
 }
 
 func (f *AuthFramework) login(c echo.Context) error {
-	return c.Render(http.StatusOK, "index", f.config)
+	return c.Render(http.StatusOK, "login", f.config)
 }

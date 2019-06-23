@@ -13,6 +13,7 @@ type (
 		PublicKeyPath  string `yaml:"public_key"`
 		PrivateKeyPath string `yaml:"private_key"`
 		BitSize        int    `yaml:"bit_size"`
+		CookieSecret   string `yaml:"cookie_secret"`
 	}
 
 	Customization struct {
