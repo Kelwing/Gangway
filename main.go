@@ -2,19 +2,17 @@ package main
 
 import (
 	"crypto/rsa"
-	"encoding/asn1"
-	"encoding/pem"
 	"fmt"
+	"html/template"
+	"io"
+	"os"
+
 	"github.com/gorilla/sessions"
 	"github.com/kelwing/Gangway/cfg"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"html/template"
-	"io"
-	"net/http"
-	"os"
 )
 
 type AuthFramework struct {
@@ -42,6 +40,9 @@ func main() {
 	}
 
 	fi, err := os.Stat("config/config.yaml")
+	if err != nil {
+		log.Fatal("Config doesn't exist! ", err)
+	}
 
 	data := make([]byte, fi.Size())
 	_, err = cf.Read(data)
@@ -96,9 +97,9 @@ func main() {
 	// Routes
 	e.GET("/", e.hello)
 	e.GET("/publicKey", e.publicKey)
-	e.GET("/login", e.login)
-	e.GET("/process/:id", e.processLogin)
-	e.GET("/authorize", e.authCallback)
+	e.GET("/auth/login", e.login)
+	e.GET("/auth/process/:id", e.processLogin)
+	e.GET("/auth/authorize", e.authCallback)
 	e.GET("/authtest", e.authTest)
 	// Start server
 	port := os.Getenv("PORT")
@@ -106,24 +107,4 @@ func main() {
 		port = "8989"
 	}
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
-}
-
-func (f *AuthFramework) hello(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{"app": "gangway", "version": "0.0.1"})
-}
-
-func (f *AuthFramework) publicKey(c echo.Context) error {
-	asn1Bytes, err := asn1.Marshal(f.KeyPair.PublicKey)
-	checkError(err)
-
-	var pemkey = &pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: asn1Bytes,
-	}
-
-	return c.Blob(http.StatusOK, "application/x-pem-file", pem.EncodeToMemory(pemkey))
-}
-
-func (f *AuthFramework) login(c echo.Context) error {
-	return c.Render(http.StatusOK, "login", f.config)
 }

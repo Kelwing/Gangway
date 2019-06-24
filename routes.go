@@ -1,16 +1,23 @@
 package main
 
 import (
-	"context"
-	"encoding/hex"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
-	"net/http"
 	"strconv"
-	"time"
+)
+
+package main
+
+import (
+"context"
+"encoding/hex"
+"github.com/dgrijalva/jwt-go"
+"github.com/google/uuid"
+"github.com/gorilla/sessions"
+"github.com/labstack/echo-contrib/session"
+"github.com/labstack/echo/v4"
+"net/http"
+"strconv"
+"time"
 )
 
 func (f *AuthFramework) processLogin(c echo.Context) error {
@@ -85,4 +92,24 @@ func (f *AuthFramework) authCallback(c echo.Context) error {
 func (f *AuthFramework) authTest(c echo.Context) error {
 	token := c.QueryParam("token")
 	return c.JSON(http.StatusOK, map[string]string{"message": "OK", "token": token})
+}
+
+func (f *AuthFramework) index(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{"app": "gangway", "version": "0.0.1"})
+}
+
+func (f *AuthFramework) publicKey(c echo.Context) error {
+	asn1Bytes, err := asn1.Marshal(f.KeyPair.PublicKey)
+	checkError(err)
+
+	var pemkey = &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: asn1Bytes,
+	}
+
+	return c.Blob(http.StatusOK, "application/x-pem-file", pem.EncodeToMemory(pemkey))
+}
+
+func (f *AuthFramework) login(c echo.Context) error {
+	return c.Render(http.StatusOK, "login", f.config)
 }
