@@ -1,0 +1,52 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/project
+    docker:
+      - image: golang
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Create output directory
+          command: |
+            mkdir -p ~/artifacts
+      - run:
+          name: Build Linux Binary
+          command: |
+            GOOS=linux GOARCH=amd64 go build -o ~/artifacts/gangway_linux_amd64
+      - run:
+          name: Build MacOS Binary
+          command: |
+            GOOS=darwin GOARCH=amd64 go build -o ~/artifacts/gangway_darwin_amd64
+      - run:
+          name: Build Windows Binary
+          command: |
+            GOOS=windows GOARCH=amd64 go build -o ~/artifacts/gangway_windows_amd64
+  publish-github-release:
+    docker:
+      - image: circleci/golang:1.8
+    steps:
+      - attach_workspace:
+          at: ~/artifacts
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/artifacts/
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
