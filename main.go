@@ -102,7 +102,6 @@ func main() {
 	e.GET("/authtest", e.authTest)
 	// Start server
 	port := os.Getenv("PORT")
-	fmt.Println("Port: ", port)
 	if port == "" {
 		port = "8989"
 	}
