@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/project
+    working_directory: /opt/app
     docker:
       - image: golang
     steps:
@@ -10,30 +10,34 @@ jobs:
       - run:
           name: Create output directory
           command: |
-            mkdir -p ~/artifacts
+            mkdir -p /opt/app/workspace/artifacts
       - run:
           name: Build Linux Binary
           command: |
-            GOOS=linux GOARCH=amd64 go build -o ~/artifacts/gangway_linux_amd64
+            GOOS=linux GOARCH=amd64 go build -o workspace/artifacts/gangway_linux_amd64
       - run:
           name: Build MacOS Binary
           command: |
-            GOOS=darwin GOARCH=amd64 go build -o ~/artifacts/gangway_darwin_amd64
+            GOOS=darwin GOARCH=amd64 go build -o workspace/artifacts/gangway_darwin_amd64
       - run:
           name: Build Windows Binary
           command: |
-            GOOS=windows GOARCH=amd64 go build -o ~/artifacts/gangway_windows_amd64
+            GOOS=windows GOARCH=amd64 go build -o workspace/artifacts/gangway_windows_amd64
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - artifacts
   publish-github-release:
     docker:
       - image: circleci/golang:1.8
     steps:
       - attach_workspace:
-          at: ~/artifacts
+          at: /opt/app/workspace
       - run:
           name: "Publish Release on GitHub"
           command: |
             go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /opt/app/workspace/artifacts
 workflows:
   version: 2
   main:
