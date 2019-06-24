@@ -1,23 +1,19 @@
 package main
 
 import (
-	"github.com/gorilla/sessions"
+	"context"
+	"encoding/asn1"
+	"encoding/hex"
+	"encoding/pem"
+	"net/http"
 	"strconv"
-)
+	"time"
 
-package main
-
-import (
-"context"
-"encoding/hex"
-"github.com/dgrijalva/jwt-go"
-"github.com/google/uuid"
-"github.com/gorilla/sessions"
-"github.com/labstack/echo-contrib/session"
-"github.com/labstack/echo/v4"
-"net/http"
-"strconv"
-"time"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
 )
 
 func (f *AuthFramework) processLogin(c echo.Context) error {
