@@ -22,7 +22,7 @@ jobs:
       - run:
           name: Build Windows Binary
           command: |
-            GOOS=windows GOARCH=amd64 go build -o workspace/artifacts/gangway_windows_amd64
+            GOOS=windows GOARCH=amd64 go build -o workspace/artifacts/gangway_windows_amd64.exe
       - persist_to_workspace:
           root: workspace
           paths:
@@ -32,12 +32,12 @@ jobs:
       - image: circleci/golang:1.8
     steps:
       - attach_workspace:
-          at: /opt/app/workspace
+          at: /tmp/workspace
       - run:
           name: "Publish Release on GitHub"
           command: |
             go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /opt/app/workspace/artifacts
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /tmp/workspace/artifacts
 workflows:
   version: 2
   main:
