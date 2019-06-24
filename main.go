@@ -95,7 +95,7 @@ func main() {
 	e.Static("/assets", "public/assets")
 
 	// Routes
-	e.GET("/", e.hello)
+	e.GET("/", e.index)
 	e.GET("/publicKey", e.publicKey)
 	e.GET("/auth/login", e.login)
 	e.GET("/auth/process/:id", e.processLogin)
