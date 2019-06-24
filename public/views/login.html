@@ -24,11 +24,15 @@
 					Choose a login provider
 				</div>
 				<div class="has-text-centered">
-					{{ range $index, $element := .Providers }}
-						{{ if .Enabled }}
-							<a class="button is-vcentered is-primary is-outlined" href="/process/{{ $index }}">{{ .Name }}</a>
+					<div class="columns is-multiline is-1">
+						{{ range $index, $element := .Providers }}
+							{{ if .Enabled }}
+								<div class="column is-full">
+									<a class="button is-vcentered is-primary is-outlined" href="/process/{{ $index }}">{{ .Name }}</a>
+								</div>
+							{{ end }}
 						{{ end }}
-					{{ end }}
+					</div>
 				</div>
 				<div class="has-text-centered">
 					Powered by <a href="">Gangway</a>
