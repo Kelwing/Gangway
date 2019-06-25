@@ -4,14 +4,14 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="icon" href="assets/img/logo_r_resumme.png" type="image/x-icon" />
+		<link rel="icon" href="/assets/img/logo_r_resumme.png" type="image/x-icon" />
 		<title>Log In</title>
-		<script src="assets/js/particles.js"></script>
-		<script src="assets/js/main.js"></script>
+		<script src="/assets/js/particles.js"></script>
+		<script src="/assets/js/main.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.3/css/bulma.min.css">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
-		<link rel="stylesheet" href="assets/css/main.css">
+		<link rel="stylesheet" href="/assets/css/main.css">
 	</head>
 	<body>
 	<div class="columns is-vcentered">
@@ -28,7 +28,7 @@
 						{{ range $index, $element := .Providers }}
 							{{ if .Enabled }}
 								<div class="column is-full">
-									<a class="button is-vcentered is-primary is-outlined" href="/process/{{ $index }}">{{ .Name }}</a>
+									<a class="button is-vcentered is-primary is-outlined" href="/auth/process/{{ $index }}">{{ .Name }}</a>
 								</div>
 							{{ end }}
 						{{ end }}

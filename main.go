@@ -15,6 +15,8 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+var Version string
+
 type authFramework struct {
 	*echo.Echo
 	config  cfg.Config
@@ -100,7 +102,14 @@ func main() {
 	e.GET("/auth/login", e.login)
 	e.GET("/auth/process/:id", e.processLogin)
 	e.GET("/auth/authorize", e.authCallback)
-	e.GET("/authtest", e.authTest)
+	g := e.Group("/protected")
+	g.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		ContextKey:    "user",
+		SigningKey:    e.KeyPair.Public(),
+		SigningMethod: "RS256",
+		TokenLookup:   "query:token",
+	}))
+	g.GET("/authtest", e.authTest)
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {

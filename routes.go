@@ -91,7 +91,7 @@ func (f *authFramework) authTest(c echo.Context) error {
 }
 
 func (f *authFramework) index(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{"app": "gangway", "version": "0.0.1"})
+	return c.JSON(http.StatusOK, map[string]string{"app": "gangway", "version": Version})
 }
 
 func (f *authFramework) publicKey(c echo.Context) error {
