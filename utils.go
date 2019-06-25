@@ -12,21 +12,25 @@ import (
 	"os"
 )
 
-func (f *AuthFramework) GenerateKeyPair(privateKeyPath string, bitSize int) (privPath, pubPath string) {
+func (f *authFramework) generateKeyPair(privateKeyPath string, bitSize int) (privPath, pubPath string, err error) {
 	log.Println("Generating private key with bit size: ", bitSize)
-	var err error
 	f.KeyPair, err = rsa.GenerateKey(rand.Reader, bitSize)
-	checkError(err)
+	if err != nil {
+		return
+	}
 
 	privPath = privateKeyPath
 	pubPath = fmt.Sprintf("%s.pub", privateKeyPath)
 
-	savePEMKey(privateKeyPath, f.KeyPair)
-	savePublicPEMKey(pubPath, f.KeyPair.PublicKey)
+	err = savePEMKey(privateKeyPath, f.KeyPair)
+	if err != nil {
+		return
+	}
+	err = savePublicPEMKey(pubPath, f.KeyPair.PublicKey)
 	return
 }
 
-func LoadPrivateKey(filename string) (*rsa.PrivateKey, error) {
+func loadPrivateKey(filename string) (*rsa.PrivateKey, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -37,7 +41,7 @@ func LoadPrivateKey(filename string) (*rsa.PrivateKey, error) {
 	return x509.ParsePKCS1PrivateKey(privateKey.Bytes)
 }
 
-func LoadPublicKey(filename string) (*rsa.PublicKey, error) {
+func loadPublicKey(filename string) (*rsa.PublicKey, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -48,10 +52,12 @@ func LoadPublicKey(filename string) (*rsa.PublicKey, error) {
 	return x509.ParsePKCS1PublicKey(publicKey.Bytes)
 }
 
-func savePEMKey(fileName string, key *rsa.PrivateKey) {
+func savePEMKey(fileName string, key *rsa.PrivateKey) error {
 	log.Print("Saving private key: ", fileName)
 	outFile, err := os.Create(fileName)
-	checkError(err)
+	if err != nil {
+		return err
+	}
 	defer outFile.Close()
 
 	var privateKey = &pem.Block{
@@ -60,12 +66,14 @@ func savePEMKey(fileName string, key *rsa.PrivateKey) {
 	}
 
 	err = pem.Encode(outFile, privateKey)
-	checkError(err)
+	return err
 }
 
-func savePublicPEMKey(fileName string, pubkey rsa.PublicKey) {
+func savePublicPEMKey(fileName string, pubkey rsa.PublicKey) error {
 	asn1Bytes, err := asn1.Marshal(pubkey)
-	checkError(err)
+	if err != nil {
+		return err
+	}
 
 	var pemkey = &pem.Block{
 		Type:  "PUBLIC KEY",
@@ -73,15 +81,11 @@ func savePublicPEMKey(fileName string, pubkey rsa.PublicKey) {
 	}
 
 	pemfile, err := os.Create(fileName)
-	checkError(err)
+	if err != nil {
+		return err
+	}
 	defer pemfile.Close()
 
 	err = pem.Encode(pemfile, pemkey)
-	checkError(err)
-}
-
-func checkError(err error) {
-	if err != nil {
-		log.Fatalln("Fatal error ", err.Error())
-	}
+	return err
 }

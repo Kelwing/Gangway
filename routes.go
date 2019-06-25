@@ -16,7 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (f *AuthFramework) processLogin(c echo.Context) error {
+func (f *authFramework) processLogin(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "invalid provider"})
@@ -48,7 +48,7 @@ func (f *AuthFramework) processLogin(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func (f *AuthFramework) authCallback(c echo.Context) error {
+func (f *authFramework) authCallback(c echo.Context) error {
 	sess, _ := session.Get("session", c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
@@ -85,18 +85,20 @@ func (f *AuthFramework) authCallback(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, f.config.Providers[id].TokenRedirect+"?token="+tokenString)
 }
 
-func (f *AuthFramework) authTest(c echo.Context) error {
+func (f *authFramework) authTest(c echo.Context) error {
 	token := c.QueryParam("token")
 	return c.JSON(http.StatusOK, map[string]string{"message": "OK", "token": token})
 }
 
-func (f *AuthFramework) index(c echo.Context) error {
+func (f *authFramework) index(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"app": "gangway", "version": "0.0.1"})
 }
 
-func (f *AuthFramework) publicKey(c echo.Context) error {
+func (f *authFramework) publicKey(c echo.Context) error {
 	asn1Bytes, err := asn1.Marshal(f.KeyPair.PublicKey)
-	checkError(err)
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
 
 	var pemkey = &pem.Block{
 		Type:  "PUBLIC KEY",
@@ -106,6 +108,6 @@ func (f *AuthFramework) publicKey(c echo.Context) error {
 	return c.Blob(http.StatusOK, "application/x-pem-file", pem.EncodeToMemory(pemkey))
 }
 
-func (f *AuthFramework) login(c echo.Context) error {
+func (f *authFramework) login(c echo.Context) error {
 	return c.Render(http.StatusOK, "login", f.config)
 }

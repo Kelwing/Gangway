@@ -15,17 +15,17 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-type AuthFramework struct {
+type authFramework struct {
 	*echo.Echo
 	config  cfg.Config
 	KeyPair *rsa.PrivateKey
 }
 
-type Template struct {
+type customTemplate struct {
 	templates *template.Template
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *customTemplate) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
@@ -55,22 +55,22 @@ func main() {
 		log.Fatal("Unable to load config: ", err)
 	}
 
-	e := AuthFramework{Echo: echo.New()}
+	e := authFramework{Echo: echo.New()}
 	e.config = config
 
 	if _, err := os.Stat(config.Security.PrivateKeyPath); os.IsNotExist(err) {
-		_, pub := e.GenerateKeyPair(config.Security.PrivateKeyPath, config.Security.BitSize)
+		_, pub, err := e.generateKeyPair(config.Security.PrivateKeyPath, config.Security.BitSize)
 		config.Security.PublicKeyPath = pub
 		err = config.Save()
 		if err != nil {
 			log.Fatal("Unable to save config: ", err)
 		}
 	} else {
-		e.KeyPair, err = LoadPrivateKey(config.Security.PrivateKeyPath)
+		e.KeyPair, err = loadPrivateKey(config.Security.PrivateKeyPath)
 		if err != nil {
 			log.Fatal("Unable to load private key")
 		}
-		pk, err := LoadPublicKey(config.Security.PublicKeyPath)
+		pk, err := loadPublicKey(config.Security.PublicKeyPath)
 		if err != nil {
 			log.Fatal("Unable to load public key")
 		}
@@ -86,7 +86,7 @@ func main() {
 	e.Use(middleware.BodyLimit("10M"))
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Security.CookieSecret))))
 
-	t := &Template{
+	t := &customTemplate{
 		templates: template.Must(template.ParseGlob("public/views/*.html")),
 	}
 
