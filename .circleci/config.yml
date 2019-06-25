@@ -18,11 +18,11 @@ jobs:
       - run:
           name: Build MacOS Binary
           command: |
-            GOOS=darwin GOARCH=amd64 go build VERSION=`git describe --tags --abbrev=0` go build -ldflags "-X main.Version=$VERSION" -o workspace/artifacts/gangway_darwin_amd64
+            GOOS=darwin GOARCH=amd64 VERSION=`git describe --tags --abbrev=0` go build -ldflags "-X main.Version=$VERSION" -o workspace/artifacts/gangway_darwin_amd64
       - run:
           name: Build Windows Binary
           command: |
-            GOOS=windows GOARCH=amd64 go build VERSION=`git describe --tags --abbrev=0` go build -ldflags "-X main.Version=$VERSION" -o workspace/artifacts/gangway_windows_amd64.exe
+            GOOS=windows GOARCH=amd64 VERSION=`git describe --tags --abbrev=0` go build -ldflags "-X main.Version=$VERSION" -o workspace/artifacts/gangway_windows_amd64.exe
       - persist_to_workspace:
           root: workspace
           paths:
