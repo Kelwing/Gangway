@@ -4,7 +4,7 @@ for authentication.
 
 ## Introduction
 Gangway is designed to provide a separate authentication service that can be plugged into any
-project that is designed to utilized OAuth2 from one or more public OAuth2 providers.
+project that utilizes OAuth2 from one or more public OAuth2 providers.
 
 It works by running users through a typical OAuth2 flow, obtains the token from the provider,
 stores the token, provider name that you specify, and expire time in a JWT and signs the
