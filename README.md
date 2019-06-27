@@ -13,6 +13,15 @@ JWT using an RSA private key that you provide, or you can let Gangway generate o
 The public key is then exposed over an HTTP endpoint, so you can validate the web tokens
 across any number of services you want to tie in.
 
+## Features
+
+[x] Auth with any OAuth2 provider
+[x] Redirect back to a custom URL to pass the JWT back to your application
+[x] Built-in login page
+[x] Implements OAuth 2 state parameter
+[ ] Custom token manipulation using Javascript (ES5)
+[ ] Automatic config reloading using filesystem watchers
+
 ## Configuration
 The configuration file is located in config/config.yaml.  Upon first run, a sample config
 will be generated for you. 

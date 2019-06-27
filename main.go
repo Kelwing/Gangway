@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+// Version stores the current version, passed in at build time
 var Version string
 
 type authFramework struct {
