@@ -99,7 +99,7 @@ func main() {
 
 	// Routes
 	e.GET("/", e.index)
-	e.GET("/publicKey", e.publicKey)
+	e.GET("/publickey", e.publicKey)
 	e.GET("/auth/login", e.login)
 	e.GET("/auth/process/:id", e.processLogin)
 	e.GET("/auth/authorize", e.authCallback)
