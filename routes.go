@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -43,9 +44,9 @@ func (f *authFramework) processLogin(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "unable to store session data"})
 	}
 
-	url := f.config.Providers[id].AuthCodeURL(randomString)
+	uri := f.config.Providers[id].AuthCodeURL(randomString)
 
-	return c.Redirect(http.StatusTemporaryRedirect, url)
+	return c.Redirect(http.StatusTemporaryRedirect, uri)
 }
 
 func (f *authFramework) authCallback(c echo.Context) error {
@@ -65,6 +66,12 @@ func (f *authFramework) authCallback(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "invalid state"})
 	}
 
+	redirectUri := sess.Values["redirect"].(string)
+	if redirectUri == "" {
+		// fall back to config redirect
+		redirectUri = f.config.Providers[id].RedirectURL
+	}
+
 	code := c.QueryParam("code")
 	token, err := f.config.Providers[id].Exchange(context.Background(), code)
 	if err != nil {
@@ -82,7 +89,7 @@ func (f *authFramework) authCallback(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to sign token"})
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, f.config.Providers[id].TokenRedirect+"?token="+tokenString)
+	return c.Redirect(http.StatusTemporaryRedirect, redirectUri+"?token="+tokenString)
 }
 
 func (f *authFramework) authTest(c echo.Context) error {
@@ -109,5 +116,36 @@ func (f *authFramework) publicKey(c echo.Context) error {
 }
 
 func (f *authFramework) login(c echo.Context) error {
+	redirectURI := c.Param("redirect")
+
+	if redirectURI != "" {
+		u, err := url.Parse(redirectURI)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"msg": "redirect URI is invalid"})
+		}
+		allowed := false
+		for i := 0; i < len(f.config.Security.AllowedDomains); i++ {
+			if f.config.Security.AllowedDomains[i] == u.Host {
+				allowed = true
+				break
+			}
+		}
+
+		if !allowed {
+			return c.JSON(http.StatusNotAcceptable, map[string]string{"msg": "redirect URI isn't allowed"})
+		}
+
+		sess, _ := session.Get("session", c)
+		sess.Options = &sessions.Options{
+			Path:     "/",
+			MaxAge:   86400 * 7,
+			HttpOnly: true,
+		}
+		sess.Values["redirect"] = redirectURI
+		err = sess.Save(c.Request(), c.Response())
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": "unable to store session data"})
+		}
+	}
 	return c.Render(http.StatusOK, "login", f.config)
 }

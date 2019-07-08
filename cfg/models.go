@@ -5,16 +5,17 @@ import "golang.org/x/oauth2"
 type (
 	Provider struct {
 		oauth2.Config
-		TokenRedirect string `yaml:"post_auth_redirect"`
+		TokenRedirect string `yaml:"post_auth_redirect,omitempty"`
 		Enabled       bool   `yaml:"enabled"`
 		Name          string `yaml:"name"`
 	}
 
 	Security struct {
-		PublicKeyPath  string `yaml:"public_key"`
-		PrivateKeyPath string `yaml:"private_key"`
-		BitSize        int    `yaml:"bit_size"`
-		CookieSecret   string `yaml:"cookie_secret"`
+		PublicKeyPath  string   `yaml:"public_key"`
+		PrivateKeyPath string   `yaml:"private_key"`
+		BitSize        int      `yaml:"bit_size"`
+		CookieSecret   string   `yaml:"cookie_secret"`
+		AllowedDomains []string `yaml:"allowed_redirect_domains"`
 	}
 
 	Customization struct {

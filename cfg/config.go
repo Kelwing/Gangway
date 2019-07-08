@@ -43,7 +43,6 @@ func (c *Config) GenerateSample() error {
 				Config: oauth2.Config{
 					ClientID:     "my_client_id",
 					ClientSecret: "my_client_secret",
-					RedirectURL:  "https://example.com/fake_redirect",
 					Scopes:       []string{"scope1", "scope2"},
 					Endpoint:     oauth2.Endpoint{},
 				},
