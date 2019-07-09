@@ -8,4 +8,5 @@ RUN GOOS=linux GOARCH=amd64 VERSION=`git describe --tags --abbrev=0` go build -l
 FROM alpine
 RUN apk add --no-cache ca-certificates tzdata && update-ca-certificates
 COPY --from=builder /opt/build/gangway /gangway
+COPY --from=builder /opt/build/public /public
 ENTRYPOINT ["/gangway"]

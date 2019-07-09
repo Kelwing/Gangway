@@ -5,6 +5,7 @@ import (
 	"encoding/asn1"
 	"encoding/hex"
 	"encoding/pem"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -57,19 +58,19 @@ func (f *authFramework) authCallback(c echo.Context) error {
 		HttpOnly: true,
 	}
 
-	state := sess.Values["state"]
+	state := sess.Values["state"].(string)
 	id, err := strconv.Atoi(sess.Values["provider"].(string))
 
 	userState := c.QueryParam("state")
-
+	log.Printf("%s == %s", userState, state)
 	if userState != state {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "invalid state"})
 	}
-
-	redirectUri := sess.Values["redirect"].(string)
-	if redirectUri == "" {
-		// fall back to config redirect
-		redirectUri = f.config.Providers[id].RedirectURL
+	var redirectURI string
+	if sess.Values["redirect"] == nil {
+		redirectURI = f.config.Providers[id].TokenRedirect
+	} else {
+		redirectURI = sess.Values["redirect"].(string)
 	}
 
 	code := c.QueryParam("code")
@@ -89,7 +90,7 @@ func (f *authFramework) authCallback(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to sign token"})
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, redirectUri+"?token="+tokenString)
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURI+"?token="+tokenString)
 }
 
 func (f *authFramework) authTest(c echo.Context) error {
