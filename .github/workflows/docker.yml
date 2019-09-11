@@ -10,4 +10,4 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag docker.pkg.github.com/kelwing/gangway/gangway:$(date +%s)
     - name: Publish to Package Registry
-      run: echo $GITHUB_REF
+      run: echo $(basename $GITHUB_REF)
