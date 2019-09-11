@@ -1,0 +1,13 @@
+name: Build Docker Image
+on: [push]
+#    tags:
+#      - /^v\d+\.\d+\.\d+$/
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag docker.pkg.github.com/$GITHUB_REPOSITORY/gangway:$(date +%s)
+    - name: Publish to Package Registry
+      run: echo $GITHUB_REF
