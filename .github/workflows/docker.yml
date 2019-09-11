@@ -11,5 +11,5 @@ jobs:
       run: docker build . --file Dockerfile --tag docker.pkg.github.com/kelwing/gangway/gangway:$(basename $GITHUB_REF)
     - name: Publish to Package Registry
       run: |
-        docker login docker.pkg.github.com --username Kelwing --password $GITHUB_TOKEN
+        docker login docker.pkg.github.com --username Kelwing --password $PUBLISH_TOKEN
         docker push docker.pkg.github.com/Kelwing/Gangway/gangway:$(basename $GITHUB_REF)
