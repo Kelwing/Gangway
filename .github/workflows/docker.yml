@@ -10,6 +10,8 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag docker.pkg.github.com/kelwing/gangway/gangway:$(basename $GITHUB_REF)
     - name: Publish to Package Registry
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        docker login docker.pkg.github.com --username Kelwing --password ${{ secrets.GITHUB_TOKEN }}
+        docker login docker.pkg.github.com --username Kelwing --password $GITHUB_TOKEN
         docker push docker.pkg.github.com/Kelwing/Gangway/gangway:$(basename $GITHUB_REF)
