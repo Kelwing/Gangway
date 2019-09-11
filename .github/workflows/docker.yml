@@ -14,4 +14,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
       run: |
         docker login docker.pkg.github.com --username Kelwing --password $GITHUB_TOKEN
-        docker push docker.pkg.github.com/Kelwing/Gangway/gangway:$(basename $GITHUB_REF)
+        docker push docker.pkg.github.com/kelwing/gangway/gangway:$(basename $GITHUB_REF)
