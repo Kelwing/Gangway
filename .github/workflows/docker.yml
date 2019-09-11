@@ -8,6 +8,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag docker.pkg.github.com/$GITHUB_REPOSITORY/gangway:$(date +%s)
+      run: docker build . --file Dockerfile --tag docker.pkg.github.com/kelwing/gangway/gangway:$(date +%s)
     - name: Publish to Package Registry
       run: echo $GITHUB_REF
