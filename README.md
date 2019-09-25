@@ -19,7 +19,7 @@ across any number of services you want to tie in.
 - [x] Redirect back to a custom URL to pass the JWT back to your application
 - [x] Built-in login page
 - [x] Implements OAuth 2 state parameter
-- [ ] Custom token manipulation using Javascript (ES5)
+- [ ] Custom token manipulation
 - [ ] Automatic config reloading using filesystem watchers
 
 ## Configuration
