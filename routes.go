@@ -31,10 +31,12 @@ func (f *authFramework) processLogin(c echo.Context) error {
 	randomString := hex.EncodeToString(randomBytes)
 
 	sess, _ := session.Get("session", c)
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7,
-		HttpOnly: true,
+	if sess.Options == nil {
+		sess.Options = &sessions.Options{
+			Path:     "/",
+			MaxAge:   86400 * 7,
+			HttpOnly: true,
+		}
 	}
 
 	sess.Values["state"] = randomString
@@ -66,12 +68,7 @@ func (f *authFramework) authCallback(c echo.Context) error {
 	if userState != state {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "invalid state"})
 	}
-	var redirectURI string
-	if sess.Values["redirect"] == nil {
-		redirectURI = f.config.Providers[id].TokenRedirect
-	} else {
-		redirectURI = sess.Values["redirect"].(string)
-	}
+	redirectURI := sess.Values["redirect"].(string)
 
 	code := c.QueryParam("code")
 	token, err := f.config.Providers[id].Exchange(context.Background(), code)
@@ -117,7 +114,9 @@ func (f *authFramework) publicKey(c echo.Context) error {
 }
 
 func (f *authFramework) login(c echo.Context) error {
-	redirectURI := c.Param("redirect")
+	redirectURI := c.QueryParam("redirect")
+
+	log.Println(redirectURI)
 
 	if redirectURI != "" {
 		u, err := url.Parse(redirectURI)
@@ -143,6 +142,7 @@ func (f *authFramework) login(c echo.Context) error {
 			HttpOnly: true,
 		}
 		sess.Values["redirect"] = redirectURI
+		log.Println(sess.Values)
 		err = sess.Save(c.Request(), c.Response())
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"message": "unable to store session data"})
