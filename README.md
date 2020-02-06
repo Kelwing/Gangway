@@ -1,4 +1,6 @@
 # Gangway
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FKelwing%2FGangway.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FKelwing%2FGangway?ref=badge_shield)
+
 A Golang service for providing Single sign-on using JSON Web Tokens using any public OAuth2 provider
 for authentication.
 
@@ -77,3 +79,7 @@ We recommend storing the RSA keys and config in a Docker volume.
 ```bash
 docker run -v config:/config -v ssl:/ssl -p 8989:8989 kelwing/gangway
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FKelwing%2FGangway.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FKelwing%2FGangway?ref=badge_large)
